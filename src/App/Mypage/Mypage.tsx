@@ -1,12 +1,24 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { ColorValue, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ColorValue,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSelector } from "react-redux";
 
-import { UserData } from "../../Api/memberAPI";
-import UserStorage from "../../storage/UserStorage";
+import { DeleteAPI } from "../../Api/fetchAPI";
+import { Spacer, TextButton } from "../../components/common";
 import { NavigationProps } from "../../Navigator/Routes";
+import UserStorage from "../../storage/UserStorage";
+import { UserData } from "../../types/User";
+import Myimg from "./Myimg";
 
 type sectionItem = {
   title?: string;
@@ -26,7 +38,7 @@ function Section({ item }: { item: sectionItem }) {
   const last_idx = item.contents.length - 1;
 
   return (
-    <View style={styles.view}>
+    <View style={styles.profileView}>
       {!item.isNoHeader && (
         <View
           style={{
@@ -67,16 +79,6 @@ function Section({ item }: { item: sectionItem }) {
               >
                 <View>
                   <Text style={styles.text}>{content.title}</Text>
-                  {/* <Text
-                    style={{
-                      fontSize: 13,
-                      letterSpacing: 0.2,
-                      color: "#aaa",
-                      marginTop: 8,
-                    }}
-                  >
-                    {content.description}
-                  </Text> */}
                 </View>
                 <View
                   style={{
@@ -90,9 +92,9 @@ function Section({ item }: { item: sectionItem }) {
             {index !== last_idx && (
               <View
                 style={{
-                  marginHorizontal: 4,
+                  marginHorizontal: 0,
                   height: 1,
-                  backgroundColor: "#f9f9f9",
+                  backgroundColor: "#aaa",
                   marginVertical: 10,
                 }}
               />
@@ -110,21 +112,58 @@ const MyView = () => {
 
   return (
     <View style={styles.view}>
-      <Text style={styles.nickName}>{profile.nickname}</Text>
+      {/* <View style={{ paddingTop: 100 }}> */}
       <View style={styles.info}>
-        <Text>{profile.name} / </Text>
-        <Text>{profile.role} - </Text>
-        <Text>
-          {category !== null
-            ? `${category.categoryName} (${category?.majorName})`
-            : "학과·계열 선택안됨"}
-        </Text>
+        <View style={styles.userPic}>
+          <Myimg></Myimg>
+        </View>
+        <View style={styles.userinfoContainer}>
+          <View style={styles.paddingVertical}>
+            <Text style={styles.nickName}>{profile.nickname}</Text>
+          </View>
+          <View style={styles.paddingVertical}>
+            <Text style={styles.name}>
+              {profile.role} - {profile.name}
+            </Text>
+          </View>
+          <View style={styles.paddingVertical}>
+            <Text style={styles.fieldtxt}>
+              {category !== null ? `${category.categoryName}` : "계열 선택안됨"}
+            </Text>
+            <Text style={styles.fieldtxt}>
+              {category !== null ? `${category?.majorName}` : "학과 선택안됨"}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.introTxtContainer}>
+        <View style={styles.introTxt}>
+          <Text>
+            여기에 소개글 불러와야함 머라고 쓰지 겁나 길게 써도 가능할 수 있도록 조정해야함
+          </Text>
+        </View>
+        <View style={styles.introTxtBtn}>
+          <TouchableOpacity style={styles.introTxtBtn}>
+            <Text style={styles.introTxtBtnTxt}>소개글</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 };
 
 export default function MyPage() {
+  const [visibleLogoutModal, setVisibleLogoutModal] = useState(false);
+  const [visibleWithdrawModal, setVisibleWithdrawModal] = useState(false);
+
+  const userProfle = useSelector(UserStorage.userProfileSelector);
+
+  const deleteUser = () => {
+    DeleteAPI(`/user?userId=${userProfle?.id}`).then(res => {
+      console.log(res.success);
+    });
+  };
+
   const sections: sectionItem[] = [
     {
       title: "계정 설정",
@@ -135,7 +174,8 @@ export default function MyPage() {
         {
           title: "회원정보 수정",
           onclick: () => {
-            navigation.navigate("ProfileModify");
+            // navigation.navigate("PasswordCheck");
+            navigation.navigate("PasswordCheck");
           },
           // description: "다른 기기를 추가하거나 삭제합니다.",
           href: "1",
@@ -144,7 +184,7 @@ export default function MyPage() {
           title: "로그아웃",
           // description: "장치를 로그아웃하여 새 계정으로 전환합니다.",
           onclick: () => {
-            UserStorage.removeUserData();
+            setVisibleLogoutModal(true);
           },
           href: "2",
         },
@@ -158,7 +198,9 @@ export default function MyPage() {
       contents: [
         {
           title: "내가 쓴 글",
-          // description: "알람을 받지 않을 시간을 설정합니다.",
+          onclick: () => {
+            navigation.navigate("Mypost" as never);
+          },
           href: "3",
         },
         {
@@ -173,7 +215,9 @@ export default function MyPage() {
       contents: [
         {
           title: "회원탈퇴",
-          // description: "공지사항 및 새소식을 확인합니다.",
+          onclick: () => {
+            setVisibleWithdrawModal(true);
+          },
           href: "5",
         },
       ],
@@ -183,6 +227,129 @@ export default function MyPage() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* ------------ 로그아웃 모달창 */}
+      <Modal animationType="fade" transparent={true} visible={visibleLogoutModal}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            // backgroundColor: "skyblue",
+          }}
+        >
+          <View
+            style={{
+              flex: 0.6,
+              borderRadius: 25,
+              backgroundColor: "#ffffff",
+              padding: 25,
+            }}
+          >
+            <Spacer size={5} />
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>로그아웃 하시겠습니까?</Text>
+            </View>
+            <Spacer size={20} />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+              }}
+            >
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  UserStorage.removeUserData();
+                }}
+              >
+                예
+              </TextButton>
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  setVisibleLogoutModal(false);
+                }}
+              >
+                아니오
+              </TextButton>
+            </View>
+            <Spacer size={5} />
+          </View>
+        </View>
+      </Modal>
+
+      {/* ------------ 회원탈퇴 모달창 */}
+      <Modal animationType="fade" transparent={true} visible={visibleWithdrawModal}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            // backgroundColor: "skyblue",
+          }}
+        >
+          <View
+            style={{
+              flex: 0.6,
+              borderRadius: 25,
+              backgroundColor: "#ffffff",
+              padding: 25,
+            }}
+          >
+            <Spacer size={5} />
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>회원탈퇴 하시겠습니까?</Text>
+            </View>
+            <Spacer size={20} />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+              }}
+            >
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  deleteUser();
+                  UserStorage.removeUserData();
+                }}
+              >
+                예
+              </TextButton>
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  setVisibleWithdrawModal(false);
+                }}
+              >
+                아니오
+              </TextButton>
+            </View>
+            <Spacer size={5} />
+          </View>
+        </View>
+      </Modal>
+
       <MyView />
       {sections.map((section, index) => (
         <Section key={index.toString()} item={section} />
@@ -193,13 +360,22 @@ export default function MyPage() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "white",
     paddingHorizontal: 16,
     paddingVertical: 30,
     marginTop: 18,
   },
   view: {
+    flex: 1,
     marginTop: 18,
-    backgroundColor: "white",
+    backgroundColor: "#D8E1EC",
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  profileView: {
+    marginTop: 18,
+    backgroundColor: "#D8E1EC",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -210,11 +386,53 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   nickName: {
-    fontSize: 20,
-    letterSpacing: 0.2,
+    fontSize: 30,
     fontWeight: "bold",
   },
+  name: {
+    fontSize: 20,
+  },
+  fieldtxt: {
+    fontSize: 16,
+  },
   info: {
+    flex: 1,
     flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  userPic: {
+    flex: 0.4,
+    paddingHorizontal: 5,
+    alignItems: "center",
+  },
+  userinfoContainer: {
+    flex: 0.6,
+  },
+  paddingVertical: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignItems: "flex-end",
+    // backgroundColor: "skyblue",
+  },
+  introTxtContainer: {
+    marginTop: 10,
+    padding: 10,
+    borderTopColor: "#aaa",
+    borderTopWidth: 1,
+    flexDirection: "row",
+  },
+  introTxtBtn: {
+    backgroundColor: "#E0E0E0",
+    flex: 0.2,
+    marginHorizontal: 5,
+    borderColor: "black",
+    borderWidth: 1,
+  },
+  introTxtBtnTxt: {
+    fontSize: 18,
+    color: "#666666",
+  },
+  introTxt: {
+    flex: 0.8,
   },
 });
