@@ -13,8 +13,9 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 
-import { DeleteAPI } from "../../Api/fetchAPI";
-import { Spacer, TextButton } from "../../components/common";
+import { PostAPI } from "../../Api/fetchAPI";
+import DeleteAPI from "../../Api/member/DeleteUser";
+import { Input, Spacer, TextButton } from "../../components/common";
 import { NavigationProps } from "../../Navigator/Routes";
 import UserStorage from "../../storage/UserStorage";
 import { UserData } from "../../types/User";
@@ -110,9 +111,11 @@ const MyView = () => {
   const profile = useSelector(UserStorage.userProfileSelector)! as UserData;
   const category = useSelector(UserStorage.userCategorySelector);
 
+  const [visibleIntroModal, setVisibleIntoModal] = useState(false);
+  const [introduceTxt, setIntroduceTxt] = useState("");
+
   return (
     <View style={styles.view}>
-      {/* <View style={{ paddingTop: 100 }}> */}
       <View style={styles.info}>
         <View style={styles.userPic}>
           <Myimg></Myimg>
@@ -137,31 +140,87 @@ const MyView = () => {
         </View>
       </View>
       <View style={styles.introTxtContainer}>
-        <View style={styles.introTxt}>
-          <Text>
-            여기에 소개글 불러와야함 머라고 쓰지 겁나 길게 써도 가능할 수 있도록 조정해야함
+        <TouchableOpacity style={styles.introTxtBtn}>
+          <Text
+            style={styles.introTxt}
+            onPress={() => {
+              setVisibleIntoModal(true);
+            }}
+          >
+            {introduceTxt !== "" ? `${introduceTxt}` : "소개글을 입력해주세요"}
           </Text>
-        </View>
-        <View style={styles.introTxtBtn}>
-          <TouchableOpacity style={styles.introTxtBtn}>
-            <Text style={styles.introTxtBtnTxt}>소개글</Text>
-          </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       </View>
+      <Modal animationType="fade" transparent={true} visible={visibleIntroModal}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Spacer size={5} />
+            <View style={{ alignItems: "center" }}>
+              <Text style={styles.Moaltext}>소개글을 수정해주세요</Text>
+            </View>
+            <Spacer size={20} />
+            <View>
+              <Input
+                style={styles.modalInput}
+                paddingHorizontal={20}
+                borderRadius={30}
+                placeholder="소개글"
+                onChangeText={text => setIntroduceTxt(text)}
+                // value={phoneNumber}
+                // keyboardType="numbers-and-punctuation"
+                // inputMode="tel"
+              ></Input>
+              <Spacer size={10} />
+            </View>
+            <Spacer size={20} />
+            <View style={styles.modalBtnDirection}>
+              <TextButton
+                style={styles.modalConfirmBtn}
+                onPress={() => {
+                  setVisibleIntoModal(false);
+                }}
+              >
+                취소
+              </TextButton>
+              <TextButton
+                style={styles.modalConfirmBtn}
+                onPress={() => {
+                  // EditUser.changePhNum(phoneNumber);
+                }}
+              >
+                수정
+              </TextButton>
+            </View>
+            <Spacer size={5} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 export default function MyPage() {
   const [visibleLogoutModal, setVisibleLogoutModal] = useState(false);
+
   const [visibleWithdrawModal, setVisibleWithdrawModal] = useState(false);
+  const [visibleAuthentication, setVisibleAuthentication] = useState(false);
+  const [checkPassword, setCheckPassword] = useState("");
 
   const userProfle = useSelector(UserStorage.userProfileSelector);
 
-  const deleteUser = () => {
-    DeleteAPI(`/user?userId=${userProfle?.id}`).then(res => {
-      console.log(res.success);
-    });
+  const checkPasswordHandler = () => {
+    PostAPI("/user/changeinfo/identification", {
+      password: checkPassword,
+    })
+      .then(res => {
+        if (res.success == true) {
+          setVisibleAuthentication(false);
+          setVisibleWithdrawModal(true);
+        }
+      })
+      .catch(res => {
+        alert(res);
+      });
   };
 
   const sections: sectionItem[] = [
@@ -174,15 +233,12 @@ export default function MyPage() {
         {
           title: "회원정보 수정",
           onclick: () => {
-            // navigation.navigate("PasswordCheck");
-            navigation.navigate("PasswordCheck");
+            navigation.navigate("PasswordCheck" as never);
           },
-          // description: "다른 기기를 추가하거나 삭제합니다.",
           href: "1",
         },
         {
           title: "로그아웃",
-          // description: "장치를 로그아웃하여 새 계정으로 전환합니다.",
           onclick: () => {
             setVisibleLogoutModal(true);
           },
@@ -205,8 +261,17 @@ export default function MyPage() {
         },
         {
           title: "내가 쓴 댓글",
-          // description: "알림음을 설정합니다.",
+          onclick: () => {
+            // navigation.navigate("Mycomment" as never);
+          },
           href: "4",
+        },
+        {
+          title: "북마크",
+          onclick: () => {
+            navigation.navigate("Bookmark" as never);
+          },
+          href: "5",
         },
       ],
     },
@@ -216,9 +281,10 @@ export default function MyPage() {
         {
           title: "회원탈퇴",
           onclick: () => {
-            setVisibleWithdrawModal(true);
+            //setVisibleWithdrawModal(true);
+            setVisibleAuthentication(true);
           },
-          href: "5",
+          href: "6",
         },
       ],
     },
@@ -288,6 +354,76 @@ export default function MyPage() {
         </View>
       </Modal>
 
+      {/* ------------ 회원탈퇴 전 인증 모달창 */}
+      <Modal animationType="fade" transparent={true} visible={visibleAuthentication}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            // backgroundColor: "skyblue",
+          }}
+        >
+          <View
+            style={{
+              flex: 0.6,
+              borderRadius: 25,
+              backgroundColor: "#ffffff",
+              padding: 25,
+            }}
+          >
+            <Spacer size={5} />
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>비밀번호를 입력해주세요.</Text>
+            </View>
+            <Spacer size={20} />
+            <Input
+              style={{ paddingVertical: "5%", backgroundColor: "#e8eaec" }}
+              paddingHorizontal={20}
+              borderRadius={30}
+              placeholder="Password"
+              onChangeText={text => setCheckPassword(text)}
+              value={checkPassword}
+              secureTextEntry={true}
+            ></Input>
+            <Spacer size={20} />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+              }}
+            >
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  checkPasswordHandler();
+                }}
+              >
+                확인
+              </TextButton>
+              <TextButton
+                style={{
+                  width: "45%",
+                }}
+                onPress={() => {
+                  setVisibleAuthentication(false);
+                }}
+              >
+                취소
+              </TextButton>
+            </View>
+            <Spacer size={5} />
+          </View>
+        </View>
+      </Modal>
       {/* ------------ 회원탈퇴 모달창 */}
       <Modal animationType="fade" transparent={true} visible={visibleWithdrawModal}>
         <View
@@ -328,7 +464,7 @@ export default function MyPage() {
                   width: "45%",
                 }}
                 onPress={() => {
-                  deleteUser();
+                  DeleteAPI.deleteUser(userProfle!.id);
                   UserStorage.removeUserData();
                 }}
               >
@@ -398,7 +534,7 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   userPic: {
     flex: 0.4,
@@ -416,23 +552,49 @@ const styles = StyleSheet.create({
   },
   introTxtContainer: {
     marginTop: 10,
-    padding: 10,
     borderTopColor: "#aaa",
     borderTopWidth: 1,
     flexDirection: "row",
   },
   introTxtBtn: {
-    backgroundColor: "#E0E0E0",
-    flex: 0.2,
-    marginHorizontal: 5,
-    borderColor: "black",
-    borderWidth: 1,
-  },
-  introTxtBtnTxt: {
-    fontSize: 18,
-    color: "#666666",
+    flex: 1,
+    padding: 10,
   },
   introTxt: {
+    fontSize: 15,
+  },
+  modalInput: {
+    width: "100%",
+    paddingVertical: "5%",
+    backgroundColor: "#D8E1EC",
+  },
+  modalBackground: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
     flex: 0.8,
+    borderRadius: 25,
+    backgroundColor: "#ffffff",
+    padding: 15,
+  },
+  modifyingBtn: {
+    width: "25%",
+    justifyContent: "flex-end",
+    paddingLeft: 10,
+  },
+  modalConfirmBtn: {
+    width: "45%",
+  },
+  modalBtnDirection: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  Moaltext: {
+    fontSize: 17,
+    fontWeight: "bold",
   },
 });
