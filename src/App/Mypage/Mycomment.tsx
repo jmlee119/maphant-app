@@ -1,10 +1,11 @@
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 
-import { GetAPI } from "../../Api/fetchAPI";
+import { DeleteAPI, GetAPI, PostAPI } from "../../Api/fetchAPI";
+import { TextButton } from "../../components/common";
 import UserStorage from "../../storage/UserStorage";
 import { BoardArticle } from "../../types/Board";
 
@@ -16,28 +17,31 @@ export default function (): JSX.Element {
 }
 
 function Mycomment(): JSX.Element {
-  const [posts, setPosts] = React.useState<BoardArticle[]>([]);
+  const [comments, setComments] = useState<BoardArticle[] & { body: string }[]>([]);
   const [endPage, setEndPage] = React.useState<number>(0);
   const [pages, setPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const navigation = useNavigation();
 
-  const userID = useSelector(UserStorage.userProfileSelector)!.id;
+  const recordSize: number = 10;
+  const userID: number = useSelector(UserStorage.userProfileSelector)!.id;
 
   useEffect(() => {
-    GetAPI(`/profile/board?page=${pages}&recordSize=${5}&targetUserId=${userID}`).then(res => {
-      if (res.success === false) {
-        console.log(res.errors);
-        return;
-      } else {
-        setPosts([...posts, ...res.data.list]);
-        setEndPage(res.data.pagination.endPage);
-      }
-    });
+    GetAPI(`/profile/comment?page=${pages}&recordSize=${recordSize}&targetUserId=${userID}`).then(
+      res => {
+        if (res.success === false) {
+          console.log(res.errors);
+          return;
+        } else {
+          setComments([...comments, ...res.data.list]);
+          setEndPage(res.data.pagination.endPage);
+        }
+      },
+    );
   }, [pages]);
 
-  const loadMorePosts = async () => {
+  const loadMorecomments = async () => {
     if (!isLoading) {
       setIsLoading(true);
 
@@ -59,25 +63,28 @@ function Mycomment(): JSX.Element {
     const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
 
     if (offsetY + scrollViewHeight >= contentHeight - 20) {
-      loadMorePosts();
+      loadMorecomments();
     }
   }
 
-  const detailContent = (boards: BoardArticle) => {
-    console.log(posts);
-    navigation.navigate("QnAdetail", { posts: boards });
+  const detailContent = (comments: BoardArticle) => {
+    console.log(comments.board_id);
+    navigation.navigate("BoardDetail", { id: comments.board_id });
   };
 
   return (
     <>
       <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
-        {posts.map(post => (
+        {comments.map(comment => (
           <>
-            <Pressable onPress={() => detailContent(post)}>
+            <Pressable onPress={() => detailContent(comment)}>
               <View style={styles.container}>
                 <View style={styles.head}>
-                  <Text>{post.type}</Text>
+                  <View style={{ marginRight: 20 }}>
+                    <Text>{comment.board_type}</Text>
+                  </View>
                 </View>
+
                 <View
                   style={{
                     marginTop: 10,
@@ -85,18 +92,27 @@ function Mycomment(): JSX.Element {
                   }}
                 >
                   <View>
-                    <Text style={styles.title}>{post.title}</Text>
+                    <Text style={styles.title}>{comment.board_title}</Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    marginBottom: 10,
+                  }}
+                >
+                  <View>
+                    <Text style={styles.comment}>내 댓글 : {comment.body}</Text>
                   </View>
                 </View>
 
                 <View style={styles.head}>
                   <Feather name="thumbs-up" size={13} color="tomato" />
-                  <Text style={styles.good}>&#9; {post.like_cnt}</Text>
+                  <Text style={styles.good}>&#9; {comment.like_cnt}</Text>
                   <View style={{ flex: 1 }}></View>
-                  <FontAwesome name="comment-o" size={13} color="blue" />
-                  <Text style={styles.comment}>&#9; {post.comment_cnt}</Text>
+                  {/* <FontAwesome name="comment-o" size={13} color="blue" />
+                  <Text style={styles.comment}>&#9; {comments.comment_cnt}</Text> */}
                   <Text style={{ justifyContent: "flex-end", fontSize: 10 }}></Text>
-                  <Text style={styles.time}>{dateToString(post.created_at)}</Text>
+                  <Text style={styles.time}>{dateToString(comment.created_at)}</Text>
                 </View>
               </View>
             </Pressable>
@@ -106,7 +122,13 @@ function Mycomment(): JSX.Element {
         {(isLoading || isComplete) && (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>
-              {isLoading ? "로딩 중..." : "이전 글이 없습니다."}
+              {isLoading ? (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                  <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+              ) : (
+                "이전 댓글이 없습니다."
+              )}
             </Text>
           </View>
         )}
@@ -148,12 +170,15 @@ const styles = StyleSheet.create({
   },
   head: {
     flexDirection: "row",
-    justifyContent: "space-between",
   },
   title: {
-    fontSize: 20,
+    fontSize: 15,
     justifyContent: "flex-start",
     fontWeight: "bold",
+  },
+  comment: {
+    fontSize: 10,
+    justifyContent: "flex-start",
   },
   board: {
     fontSize: 10,
