@@ -1,3 +1,18 @@
+# 과끼리 : 같은 과 학생들끼리 모여서 지식 정보 공유를 위한 플랫폼 개발  
+
+기획기간 : 2023.5.31 ~ 2023.6.30 (31일)  
+개발기간 : 2023.7.3 ~ 2023.8.24 (53일)
+
+## 팀원  
+이석민
+### 백엔드  
+[한다운](https://github.com/HanDaWoon) ,[김도균](https://github.com/GGallangE), [최재익](https://github.com/Choijake), 김진선, [배수훈](https://github.com/CodingApe9), 양민철, [임대원](https://github.com/uomaep), [정부용](https://github.com/cottonrose1011), 전지환, 이재훈, 박상원, [이현석](https://github.com/pwrwpw), [하지웅](https://github.com/kou466)
+### 앱  
+[이지민](https://github.com/jmlee119), [전유림](https://github.com/Jyurim), 최현수, [오정민](https://github.com/ojingjing), [김민조](https://github.com/Mongjo), 문소연, 김예진  
+### 웹
+김이레, [박현수](https://github.com/Korcp), 윤진수, 백세은, 오영석, 정현준
+
+
 ## 공통
 ![cf](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white)
 ![jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white)
@@ -33,7 +48,10 @@
 ![eslint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white)
 ![prettier](https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E)
 
+### 아키텍처
+<hr> 
 
+![Group 6](https://github.com/jmlee119/maphant-app/assets/68285285/b3d9406b-9b7e-4773-9570-5d491b4de178)
 
 
 
