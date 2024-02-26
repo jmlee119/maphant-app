@@ -63,11 +63,10 @@
 ![photo_2024-02-25 22 11 07](https://github.com/jmlee119/maphant-app/assets/68285285/55be699f-e648-4831-b6a1-e81b837b8faf)
 
 ### 앱
-![photo_2024-02-25 22 09 57](https://github.com/jmlee119/maphant-app/assets/68285285/57a7fe99-8fe4-4fa5-a17c-39a4550ca7f3)
+![photo_2024-02-26 23 13 47](https://github.com/jmlee119/maphant-app/assets/68285285/7e62708e-cb26-4a29-9248-5a0673b1ecdb)
 
 ### 웹 
-![photo_2024-02-25 22 10 27](https://github.com/jmlee119/maphant-app/assets/68285285/f8ebfe01-8814-4c70-97f9-8ad7126e7013)
-
+![photo_2024-02-26 23 14 28](https://github.com/jmlee119/maphant-app/assets/68285285/679a5cd7-f1f5-4112-8162-f10e3c68a086)
 
 ## 기능설명
 ![KakaoTalk_Photo_2024-02-24-21-42-07 017](https://github.com/jmlee119/maphant-app/assets/68285285/55a8993e-c8c3-41af-ab02-e239f633a5a0)  
@@ -94,7 +93,7 @@
 
 <img width="630" alt="image" src="https://github.com/jmlee119/maphant-app/assets/68285285/87d1d2ac-3c6f-4de4-84e9-f6d0f5ec09bc">
 
-게시글에서 투표 기능을 만들었습니다. 투표 기능 설명좀 .. 머라적노
+게시글에서 투표 기능을 만들었습니다. 본인이 투표한 곳에 대한 퍼센테이지가 나오고, 어디에 투표했는지 확인이 가능합니다.
 
 <img width="637" alt="image" src="https://github.com/jmlee119/maphant-app/assets/68285285/b1793de5-6397-4b31-87bc-55bf5dee522b">
 
