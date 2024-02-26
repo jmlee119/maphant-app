@@ -10,7 +10,7 @@
 - 처리 방법 : 데이터 수집 후 정규식을 이용하여 데이터 정규화 및 ID 부여 실시
 - 최종 저장 : Database 전용 table을 두어 저장함    
 ## 팀원  
-이석민
+[이석민](https://blog.esukmean.com)
 ### 백엔드  
 [한다운](https://github.com/HanDaWoon) ,[김도균](https://github.com/GGallangE), [최재익](https://github.com/Choijake), 김진선, [배수훈](https://github.com/CodingApe9), 양민철, [임대원](https://github.com/uomaep), [정부용](https://github.com/cottonrose1011), 전지환, 이재훈, 박상원, [이현석](https://github.com/pwrwpw), [하지웅](https://github.com/kou466)
 ### 앱  
